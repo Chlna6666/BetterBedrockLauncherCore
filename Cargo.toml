@@ -8,3 +8,5 @@ edition = "2021"
 [dependencies]
 serde_json = "1.0.111"
 chrono = "0.4.31"
+once_cell = { version = "1.19.0", features = [] }
+
