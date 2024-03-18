@@ -9,4 +9,10 @@ edition = "2021"
 serde_json = "1.0.111"
 chrono = "0.4.31"
 once_cell = { version = "1.19.0", features = [] }
+zip = "0.6.6"
+tokio = { version = "1.0.0", features = ["rt", "rt-multi-thread", "macros"] }
+[dependencies.windows]
+version = "0.54.0"
+features = ["Data_Xml_Dom", "Management", "Management_Deployment", "Foundation_Collections"]
+
 
