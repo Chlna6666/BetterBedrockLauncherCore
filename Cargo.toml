@@ -11,8 +11,13 @@ chrono = "0.4.31"
 once_cell = { version = "1.19.0", features = [] }
 zip = "0.6.6"
 tokio = { version = "1.0.0", features = ["rt", "rt-multi-thread", "macros"] }
+serde = { version = "1.0.195", features = ["derive"] }
+xml-rs = "0.8.19"
+
 [dependencies.windows]
 version = "0.54.0"
-features = ["Data_Xml_Dom", "Management", "Management_Deployment", "Foundation_Collections"]
+features = ["Data_Xml_Dom", "Management", "Management_Deployment", "Foundation_Collections","Win32","Win32_Data_Xml","ApplicationModel"]
+
+
 
 
