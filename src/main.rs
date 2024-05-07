@@ -221,7 +221,7 @@ fn start_minecraft_release() -> io::Result<()> {
         .arg("shell:appsFolder\\Microsoft.MinecraftUWP_8wekyb3d8bbwe!App")
         .output()?;
 
-    println!("Output: {:?}", output);
+    log(LogLevel::Info, &format!("{:?}", output));
     Ok(())
 }
 fn start_minecraft_beta() -> io::Result<()> {
@@ -229,7 +229,24 @@ fn start_minecraft_beta() -> io::Result<()> {
         .arg("shell:appsFolder\\Microsoft.MinecraftWindowsBeta_8wekyb3d8bbwe!App")
         .output()?;
 
-    println!("Output: {:?}", output);
+    log(LogLevel::Info, &format!("{:?}", output));
+    Ok(())
+}
+
+fn start_minecraft_education() -> io::Result<()> {
+    let output = Command::new("explorer.exe")
+        .arg("shell:appsFolder\\Microsoft.MinecraftEducationEdition_8wekyb3d8bbwe!Microsoft.MinecraftEducationEdition")
+        .output()?;
+
+    log(LogLevel::Info, &format!("{:?}", output));
+    Ok(())
+}
+fn start_minecraft_education_preview() -> io::Result<()> {
+    let output = Command::new("explorer.exe")
+        .arg("shell:appsFolder\\Microsoft.MinecraftEducationPreview_8wekyb3d8bbwe!Microsoft.MinecraftEducationEdition")
+        .output()?;
+
+    log(LogLevel::Info, &format!("{:?}", output));
     Ok(())
 }
 
@@ -238,7 +255,7 @@ fn start_minecraft_beta() -> io::Result<()> {
 我说怎么无法获取信息&启动 浪费几天时间 我真↑服了 start_minecraft_education_exe 就不删了
  */
 fn start_minecraft_education_exe(appx_manifest_path: &str) -> io::Result<()> {
-    println!("m1133 {:?}", appx_manifest_path);
+    println!("manifest_path {:?}", appx_manifest_path);
 
     let mut minecraft_exe_path = PathBuf::from(appx_manifest_path.replace("\\", "/")); //能用就行
     minecraft_exe_path.push("Minecraft.Windows.exe");
@@ -265,22 +282,6 @@ fn start_minecraft_education_exe(appx_manifest_path: &str) -> io::Result<()> {
         }
     }
 
-    Ok(())
-}
-fn start_minecraft_education() -> io::Result<()> {
-    let output = Command::new("explorer.exe")
-        .arg("shell:appsFolder\\Microsoft.MinecraftEducationEdition_8wekyb3d8bbwe!Microsoft.MinecraftEducationEdition")
-        .output()?;
-
-    println!("Output: {:?}", output);
-    Ok(())
-}
-fn start_minecraft_education_preview() -> io::Result<()> {
-    let output = Command::new("explorer.exe")
-        .arg("shell:appsFolder\\Microsoft.MinecraftEducationPreview_8wekyb3d8bbwe!Microsoft.MinecraftEducationEdition")
-        .output()?;
-
-    println!("Output: {:?}", output);
     Ok(())
 }
 
@@ -335,7 +336,7 @@ async fn main() {
 
             if args.len() < 4 {
                 println!("用法: unpack 所在文件目标路径 解压后的路径 [-f] [-dsign] [-dappx]");
-                println!("例子: unpack c:/p/mc.appx d:/a -f - -dappx");
+                println!("例子: unpack c:/p/mc.appx d:/a -f -dsign -dappx");
             } else {
                 let mut source_path = "";
                 let mut destination_path = "";
@@ -377,16 +378,16 @@ async fn main() {
                 // 调用 extract_zip 函数
                 match extract_zip(file, destination_path, force_replace, delete_signature) {
                     Ok(_) => {
-                        println!("解压完成");
+                        log(LogLevel::Info, "解压完成");
                         if delete_source {
                             if let Err(e) = fs::remove_file(source_path) {
-                                println!("无法删除源文件: {}", e);
+                                log(LogLevel::Info, &format!("无法删除源文件: {}", e));
                             } else {
-                                println!("源文件删除成功");
+                                log(LogLevel::Info, "源文件删除成功");
                             }
                         }
                     }
-                    Err(err) => println!("解压出错: {:?}", err),
+                    Err(err) =>log(LogLevel::Info, &format!("解压出错: {:?}", err)),
                 }
             }
         }
@@ -450,13 +451,13 @@ async fn main() {
 
                                     if let Some(identity_version_str) = identity_version {
                                         if version == identity_version_str {
-                                            println!("版本匹配");
+                                            log(LogLevel::Info, "版本匹配");
                                             if auto_start{
                                                 start_minecraft_beta();
                                             }
 
                                         } else {
-                                            println!("版本不匹配");
+                                            log(LogLevel::Info, "版本不匹配");
                                             handle_remove_package_register_start(&*package_full_name, &*manifest_path, &package_path.to_string(), auto_start, &*name).await;
 
                                         }
@@ -464,11 +465,12 @@ async fn main() {
 
                                 }
                                 Ok(None) => {
-                                    println!("Failed to get package info");
+                                    log(LogLevel::Error,"无法获取包信息");
                                     register_start(&*manifest_path, auto_start, &*name).await;
                                 }
                                 Err(err) => {
-                                    println!("Error: {:?}", err);
+                                    log(LogLevel::Error, &format!("{:?}", err));
+                                    log(LogLevel::Info,"没有注册过appx");
                                     register_start(&*manifest_path, auto_start, &*name).await;
                                 }
                             }
@@ -485,13 +487,13 @@ async fn main() {
 
                                     if let Some(identity_version_str) = identity_version {
                                         if version == identity_version_str {
-                                            println!("版本匹配");
+                                            log(LogLevel::Info, "版本匹配");
 
                                             if auto_start {
                                                 start_minecraft_release();
                                             }
                                         } else {
-                                            println!("版本不匹配");
+                                            log(LogLevel::Info, "版本不匹配");
 
                                             handle_remove_package_register_start(&*package_full_name, &*manifest_path, &package_path.to_string(), auto_start, &*name).await;
 
@@ -499,11 +501,12 @@ async fn main() {
                                     }
                                 }
                                 Ok(None) => {
-                                    println!("Failed to get package info");
+                                    log(LogLevel::Error,"无法获取包信息");
                                     register_start(&*manifest_path, auto_start, &*name).await;
                                 }
                                 Err(err) => {
-                                    println!("Error: {:?}", err);
+                                    log(LogLevel::Error, &format!("{:?}", err));
+                                    log(LogLevel::Info,"没有注册过appx");
                                     register_start(&*manifest_path, auto_start, &*name).await;
                                 }
                             }
@@ -518,25 +521,26 @@ async fn main() {
 
                                     if let Some(identity_version_str) = identity_version {
                                         if version == identity_version_str {
-                                            println!("版本匹配");
+                                            log(LogLevel::Info, "版本匹配");
 
                                             if auto_start {
                                            start_minecraft_education();
 
                                             }
                                         } else {
-                                            println!("版本不匹配");
+                                            log(LogLevel::Info, "版本不匹配");
                                             handle_remove_package_register_start(&*package_full_name, &*manifest_path, &package_path.to_string(), auto_start, &*name).await;
 
                                         }
                                     }
                                 }
                                 Ok(None) => {
-                                    println!("Failed to get package info");
+                                    log(LogLevel::Error,"无法获取包信息");
                                     register_start(&*manifest_path, auto_start, &*name).await;
                                 }
                                 Err(err) => {
-                                    println!("Error: {:?}", err);
+                                    log(LogLevel::Error, &format!("{:?}", err));
+                                    log(LogLevel::Info,"没有注册过appx");
                                     register_start(&*manifest_path, auto_start, &*name).await;
                                 }
                             }
@@ -554,34 +558,36 @@ async fn main() {
 
                                     if let Some(identity_version_str) = identity_version {
                                         if version == identity_version_str {
-                                            println!("版本匹配");
+                                            log(LogLevel::Info, "版本匹配");
 
                                             if auto_start {
                                                start_minecraft_education_preview();
                                             }
                                         } else {
-                                            println!("版本不匹配");
+                                            log(LogLevel::Info, "版本不匹配");
                                             handle_remove_package_register_start(&*package_full_name, &*manifest_path, &package_path.to_string(), auto_start, &*name).await;
 
                                         }
                                     }
                                 }
                                 Ok(None) => {
-                                    println!("Failed to get package info");
+                                    log(LogLevel::Error,"无法获取包信息");
                                     register_start(&*manifest_path, auto_start, &*name).await;
                                 }
                                 Err(err) => {
-                                    println!("Error: {:?}", err);
+                                    log(LogLevel::Error, &format!("{:?}", err));
+                                    log(LogLevel::Info,"没有注册过appx");
                                     register_start(&*manifest_path, auto_start, &*name).await;
                                 }
                             }
                         }
 
                         Some(name) => {
-                            println!("未知包名: {}", name);
+                            log(LogLevel::Info, &format!("未知包名: {}", name));
+
                         }
                         None => {
-                            println!("未知包名");
+                            log(LogLevel::Info, "未知包名");
 
                         }
                     }
